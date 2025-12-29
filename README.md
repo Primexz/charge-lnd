@@ -1,7 +1,7 @@
 # charge-lnd
 
 > [!NOTE] 
-> This is a modified version of [charge-lnd](https://github.com/accumulator/charge-lnd) from [accumulator](accumulator).
+> This is a modified version of [charge-lnd](https://github.com/accumulator/charge-lnd) from [accumulator](https://github.com/accumulator).
 > Merged flow-based strategy from [openoms](https://github.com/openoms)
 
 
