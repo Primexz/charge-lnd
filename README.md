@@ -1,5 +1,10 @@
 # charge-lnd
 
+> [!NOTE] 
+> This is a modified version of [charge-lnd](https://github.com/accumulator/charge-lnd) from accumulator
+> Merged flow-based strategy from [openoms](https://github.com/openoms)
+
+
 This script matches your open Lightning channels against a number of customizable criteria and applies channel fees based on the matching policy.
 
 ## Installation
