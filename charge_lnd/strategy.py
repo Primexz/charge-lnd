@@ -270,8 +270,6 @@ def strategy_flow_based(channel, policy, **kwargs):
     analysis_period_days = policy.getint('analysis_period_days', 7)
     top_earners_count = policy.getint('top_earners_count', 5)
     fee_adjustment_pct = policy.getfloat('fee_adjustment_pct', 5.0)
-    liquidity_threshold = policy.getfloat('liquidity_threshold', 0.125)  # 1/8
-    scarcity_multiplier = policy.getfloat('scarcity_multiplier', 1.2)
     min_fee_ppm = policy.getint('min_fee_ppm', 1)
     max_fee_ppm = policy.getint('max_fee_ppm', 5000)
     base_fee_msat = policy.getint('base_fee_msat', 1000)
@@ -318,10 +316,6 @@ def strategy_flow_based(channel, policy, **kwargs):
             adjustment_factor = 1.0 + (fee_adjustment_pct / 100.0)
         else:  # Performing within target range - minimal adjustment
             adjustment_factor = 1.0
-
-        # Apply scarcity pricing if liquidity is low
-        if local_ratio < liquidity_threshold:
-            adjustment_factor *= scarcity_multiplier
 
         # Calculate new fee
         new_fee_ppm = int(current_fee_ppm * adjustment_factor)

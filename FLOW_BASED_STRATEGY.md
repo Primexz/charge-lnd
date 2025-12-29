@@ -33,11 +33,6 @@ The flow-based strategy works by:
 - `max_fee_ppm` (default: 5000): Maximum fee rate in parts per million
 - `base_fee_msat` (default: 1000): Base fee in millisatoshis
 
-### Liquidity Management
-
-- `liquidity_threshold` (default: 0.125): Local balance ratio below which scarcity pricing applies
-- `scarcity_multiplier` (default: 1.2): Multiplier for fee increases when liquidity is low
-
 ## Flow-Based Matching Criteria
 
 The strategy also introduces new matching criteria for policies:
@@ -106,11 +101,6 @@ fee_adjustment_pct = 15.0  # Aggressive to improve performance
    - If ratio < 0.8: Decrease fees (multiply by `1 - fee_adjustment_pct/100`)
    - If ratio > 1.2: Increase fees (multiply by `1 + fee_adjustment_pct/100`)
    - If 0.8 ≤ ratio ≤ 1.2: Minimal adjustment (multiply by 1.0)
-
-### Scarcity Pricing
-
-If the local balance ratio (`local_balance / capacity`) falls below the `liquidity_threshold`:
-- Apply additional fee increase: `new_fee *= scarcity_multiplier`
 
 ### Bounds Enforcement
 
