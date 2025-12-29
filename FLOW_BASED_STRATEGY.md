@@ -16,10 +16,11 @@ The flow-based strategy works by:
 | Feature | Lightning Terminal | charge-lnd flow_based |
 |---------|-------------------|----------------------|
 | Target Calculation | Top 5 earners over 60 days | Configurable (default: top 5 over 60 days) |
-| Adjustment Frequency | Every 3 days | Every charge-lnd run (configurable via cron) |
+| Adjustment Frequency | Every 3 days | Configurable via `adjustment_frequency_hrs` (default: 24h) |
 | Fee Adjustments | Small incremental changes | Configurable percentage adjustments |
 | Scarcity Pricing | At 7/8 liquidity depletion | Configurable threshold (default: 1/8 remaining) |
 | Channel Selection | All or specific channels | Policy-based matching with rich criteria |
+| State Tracking | Internal | Persistent JSON file at `~/.charge-lnd/flow_state.json` |
 
 ## Strategy Parameters
 
@@ -27,6 +28,7 @@ The flow-based strategy works by:
 
 - `reference_period_days` (default: 60): Period in days to look back for calculating target throughput
 - `analysis_period_days` (default: 7): Period in days to analyze recent performance
+- `adjustment_frequency_hrs` (default: 24): Minimum hours between fee adjustments for each channel
 - `top_earners_count` (default: 5): Number of top earning channels to use for target calculation
 - `fee_adjustment_pct` (default: 5.0): Percentage to adjust fees by each time
 - `min_fee_ppm` (default: 1): Minimum fee rate in parts per million
@@ -59,10 +61,26 @@ strategy = flow_based
 base_fee_msat = 1000
 reference_period_days = 30
 analysis_period_days = 7
+adjustment_frequency_hrs = 24
 fee_adjustment_pct = 8.0
 min_fee_ppm = 5
 max_fee_ppm = 2000
 ```
+
+### Frequent Analysis, Infrequent Adjustments
+
+Run charge-lnd every hour to continuously monitor channels, but only adjust fees once per day:
+
+```ini
+[monitored-channels]
+strategy = flow_based
+adjustment_frequency_hrs = 24  # Adjust at most once per day
+analysis_period_days = 1  # Analyze last 24 hours
+reference_period_days = 30
+fee_adjustment_pct = 10.0
+```
+
+This allows the analysis to stay current while preventing fee churn.
 
 ### Target High Performers
 
@@ -111,8 +129,10 @@ All calculated fees are constrained within `[min_fee_ppm, max_fee_ppm]` bounds.
 1. **Start Conservative**: Begin with smaller `fee_adjustment_pct` values (3-5%) and increase gradually
 2. **Monitor Performance**: Watch how channels respond to fee changes over time
 3. **Use Appropriate Periods**: Longer reference periods provide more stable targets; shorter analysis periods react faster to changes
-4. **Combine with Static Policies**: Use static strategies for new channels, small channels, or special-purpose channels
-5. **Set Reasonable Bounds**: Ensure `min_fee_ppm` and `max_fee_ppm` reflect your routing goals
+4. **Set Reasonable Adjustment Frequency**: Use `adjustment_frequency_hrs` to prevent excessive fee changes. A value of 24 hours works well for most nodes
+5. **Combine with Static Policies**: Use static strategies for new channels, small channels, or special-purpose channels
+6. **Set Reasonable Bounds**: Ensure `min_fee_ppm` and `max_fee_ppm` reflect your routing goals
+7. **Run Frequently, Adjust Infrequently**: Run charge-lnd often (e.g., hourly) to keep analysis fresh, but use `adjustment_frequency_hrs` to limit actual fee changes
 
 ## Troubleshooting
 
@@ -130,6 +150,8 @@ Check that:
 - `fee_adjustment_pct` is not too small
 - Calculated fees are not hitting min/max bounds
 - Performance ratio is outside the stable range (0.8-1.2)
+- Enough time has elapsed since last adjustment (check `adjustment_frequency_hrs`)
+- State file at `~/.charge-lnd/flow_state.json` is accessible and not corrupted
 
 ### Unexpected Fee Changes
 
@@ -137,3 +159,13 @@ Verify:
 - Target throughput calculation is reasonable for your node
 - Analysis period captures representative recent activity
 - Scarcity pricing is not triggering unexpectedly
+- `adjustment_frequency_hrs` is set appropriately for your needs
+
+### State File Issues
+
+If you need to reset adjustment tracking:
+```bash
+rm ~/.charge-lnd/flow_state.json
+```
+
+This will cause all channels to be eligible for adjustment on the next run.

@@ -63,7 +63,7 @@ def main():
         if not policy:
             continue
 
-        chp = policy.strategy.execute(channel)
+        chp = policy.strategy.execute(channel, dryrun=arguments.dry_run)
 
         if cb and is_defined(chp.circuitbreaker_params):
             cb.apply_params(chp.circuitbreaker_params, channel.remote_pubkey)
