@@ -1,6 +1,6 @@
 # Flow-Based Fee Strategy
 
-The `flow_based` strategy implements an automated fee adjustment algorithm similar to Lightning Terminal's autofees feature. It dynamically adjusts channel fees based on forwarding performance, target throughput calculations, and liquidity levels.
+The `flow_based` strategy implements an automated fee adjustment algorithm similar to Lightning Terminal's autofees feature. It dynamically adjusts channel fees based on forwarding performance and target throughput calculations.
 
 ## Overview
 
@@ -9,7 +9,6 @@ The flow-based strategy works by:
 1. **Calculating Target Throughput**: Analyzes the top earning channels over a reference period to establish a target throughput benchmark
 2. **Measuring Recent Performance**: Compares recent forwarding activity against the target throughput
 3. **Adjusting Fees Incrementally**: Makes small percentage-based fee adjustments to optimize for target performance
-4. **Applying Scarcity Pricing**: Increases fees when channel liquidity is low to signal scarcity
 
 ## How It Compares to Lightning Terminal Autofees
 
@@ -18,7 +17,6 @@ The flow-based strategy works by:
 | Target Calculation | Top 5 earners over 60 days | Configurable (default: top 5 over 60 days) |
 | Adjustment Frequency | Every 3 days | Configurable via `adjustment_frequency_hrs` (default: 24h) |
 | Fee Adjustments | Small incremental changes | Configurable percentage adjustments |
-| Scarcity Pricing | At 7/8 liquidity depletion | Configurable threshold (default: 1/8 remaining) |
 | Channel Selection | All or specific channels | Policy-based matching with rich criteria |
 | State Tracking | Internal | Persistent JSON file at `~/.charge-lnd/flow_state.json` |
 
@@ -158,7 +156,6 @@ Check that:
 Verify:
 - Target throughput calculation is reasonable for your node
 - Analysis period captures representative recent activity
-- Scarcity pricing is not triggering unexpectedly
 - `adjustment_frequency_hrs` is set appropriately for your needs
 
 ### State File Issues

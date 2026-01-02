@@ -263,9 +263,8 @@ def strategy_flow_based(channel, policy, **kwargs):
     Adjusts fees based on:
     1. Target throughput calculated from top earning channels
     2. Recent forwarding performance vs target
-    3. Channel liquidity levels (scarcity pricing)
-    4. Incremental adjustments to avoid fee volatility
-    5. Adjustment frequency limiting to avoid fee churn
+    3. Incremental adjustments to avoid fee volatility
+    4. Adjustment frequency limiting to avoid fee churn
     """
     lnd = kwargs['lnd']
 
@@ -317,8 +316,12 @@ def strategy_flow_based(channel, policy, **kwargs):
                 lnd, channel.chan_id, analysis_period_days
             )
 
+        # Calculate throughput rates for comparison
+        target_rate = target_throughput / reference_period_days if reference_period_days > 0 else 0
+        recent_rate = recent_performance / analysis_period_days if analysis_period_days > 0 else 0
+
         # Calculate fee adjustment based on performance vs target
-        performance_ratio = recent_performance / target_throughput if target_throughput > 0 else 0
+        performance_ratio = recent_rate / target_rate if target_rate > 0 else 0
 
         # Base fee adjustment logic
         if performance_ratio < 0.8:  # Underperforming - lower fees to attract traffic
